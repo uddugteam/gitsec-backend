@@ -5,9 +5,9 @@ import (
 
 	"github.com/Misnaged/annales/logger"
 
-	"microservice-template/cmd/root"
-	"microservice-template/cmd/serve"
-	"microservice-template/internal"
+	"gitsec-backend/cmd/root"
+	"gitsec-backend/cmd/serve"
+	"gitsec-backend/internal"
 )
 
 func main() {

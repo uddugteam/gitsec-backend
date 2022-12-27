@@ -1,4 +1,1 @@
-# go-microservice-template
-Template for building go microservices
-
-// TODO add readme
+# GitSec POC Backend Service

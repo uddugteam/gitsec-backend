@@ -6,7 +6,7 @@ import (
 	"github.com/Misnaged/annales/logger"
 	"github.com/spf13/cobra"
 
-	"microservice-template/internal"
+	"gitsec-backend/internal"
 )
 
 func Cmd(app *internal.App) *cobra.Command {

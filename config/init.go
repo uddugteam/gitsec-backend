@@ -9,5 +9,6 @@ func init() {
 	// environment - could be "local", "prod", "dev"
 	viper.SetDefault("env", "prod")
 
-	// TODO add default values for all configuration fields
+	// http server
+	viper.SetDefault("http.port", 8080)
 }

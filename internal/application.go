@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Misnaged/annales/logger"
 	version "github.com/Misnaged/annales/versioner"
 
-	"microservice-template/config"
+	"gitsec-backend/config"
+	"gitsec-backend/internal/server"
 )
 
 // App is main microservice application instance that
@@ -18,6 +20,8 @@ type App struct {
 	config *config.Scheme
 
 	version *version.Version
+
+	httpServer *server.HttpServer
 
 	// TODO add all needed dependencies
 }
@@ -37,14 +41,20 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
-	// TODO add dependencies initialisations
+	app.httpServer = server.NewHttpServer(app.Config())
 
 	return nil
 }
 
 // Serve start serving Application service
 func (app *App) Serve() error {
-	// TODO add all runners that needed in separate goroutines
+	go func() {
+		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.Http.Port))
+
+		if err := app.httpServer.ListenAndServe(); err != nil {
+			logger.Log().Fatal(err)
+		}
+	}()
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
@@ -52,12 +62,17 @@ func (app *App) Serve() error {
 
 	<-quit
 
+	if err := app.Stop(); err != nil {
+		return fmt.Errorf("error by stopping app: %w", err)
+	}
 	return nil
 }
 
 // Stop shutdown the application
 func (app *App) Stop() error {
-	// TODO shutdown all dependencies that need to be stopped
+	if err := app.httpServer.Close(); err != nil {
+		return fmt.Errorf("close httpServer listening: %w", err)
+	}
 
 	return nil
 }

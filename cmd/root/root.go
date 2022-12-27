@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"microservice-template/config"
-	"microservice-template/internal"
+	"gitsec-backend/config"
+	"gitsec-backend/internal"
 )
 
 func Cmd(app *internal.App) *cobra.Command {

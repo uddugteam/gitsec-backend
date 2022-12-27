@@ -4,5 +4,12 @@ package config
 type Scheme struct {
 	// Application environment
 	Env string
-	// TODO add needed config params
+
+	// Application HTTP server
+	Http *Http
+}
+
+// Http is HTTP server config scheme
+type Http struct {
+	Port int
 }
