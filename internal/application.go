@@ -11,6 +11,7 @@ import (
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/server"
+	"gitsec-backend/internal/service"
 )
 
 // App is main microservice application instance that
@@ -23,7 +24,7 @@ type App struct {
 
 	httpServer *server.HttpServer
 
-	// TODO add all needed dependencies
+	srv service.IGitService
 }
 
 // NewApplication create new App instance
@@ -41,7 +42,8 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
-	app.httpServer = server.NewHttpServer(app.Config())
+	app.srv = service.NewGitService(app.Config().Git)
+	app.httpServer = server.NewHttpServer(app.Config().Http, app.srv)
 
 	return nil
 }

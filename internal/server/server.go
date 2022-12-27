@@ -8,6 +8,7 @@ import (
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/server/handlers"
+	"gitsec-backend/internal/service"
 )
 
 const gitDir = ".git/"
@@ -20,12 +21,13 @@ type HttpServer struct {
 // NewHttpServer create new Http Server
 // instance and bind it with given port
 func NewHttpServer(
-	config *config.Scheme,
+	cfg *config.Http,
+	srv service.IGitService,
 ) *HttpServer {
 	server := &HttpServer{
-		handlers: handlers.NewHandlers(gitDir),
+		handlers: handlers.NewHandlers(gitDir, srv),
 		Server: &http.Server{
-			Addr: fmt.Sprintf(":%d", config.Http.Port),
+			Addr: fmt.Sprintf(":%d", cfg.Port),
 		},
 	}
 

@@ -7,9 +7,15 @@ type Scheme struct {
 
 	// Application HTTP server
 	Http *Http
+
+	Git *Git
 }
 
 // Http is HTTP server config scheme
 type Http struct {
 	Port int
+}
+
+type Git struct {
+	Path string
 }

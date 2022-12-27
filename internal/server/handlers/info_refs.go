@@ -5,10 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-git/go-billy/v5/osfs"
-	"github.com/go-git/go-git/v5/plumbing/format/pktline"
-	"github.com/go-git/go-git/v5/plumbing/transport"
-	"github.com/go-git/go-git/v5/plumbing/transport/server"
+	"github.com/Misnaged/annales/logger"
 )
 
 func (h *Handlers) InfoRef() http.HandlerFunc {
@@ -23,46 +20,14 @@ func (h *Handlers) InfoRef() http.HandlerFunc {
 
 		rw.Header().Set("content-type", fmt.Sprintf("application/x-%s-advertisement", service))
 
-		ep, err := transport.NewEndpoint("/")
+		resp, err := h.srv.InfoRef(r.Context(), "", service)
 		if err != nil {
 			http.Error(rw, err.Error(), 500)
-			log.Println(err)
+			logger.Log().Error(err)
 			return
 		}
-		bfs := osfs.New(h.dir)
-		ld := server.NewFilesystemLoader(bfs)
-		svr := server.NewServer(ld)
 
-		var sess transport.Session
-
-		if service == "git-upload-pack" {
-			sess, err = svr.NewUploadPackSession(ep, nil)
-			if err != nil {
-				http.Error(rw, err.Error(), 500)
-				log.Println(err)
-				return
-			}
-		} else {
-			sess, err = svr.NewReceivePackSession(ep, nil)
-			if err != nil {
-				http.Error(rw, err.Error(), 500)
-				log.Println(err)
-				return
-			}
-		}
-
-		ar, err := sess.AdvertisedReferencesContext(r.Context())
-		if err != nil {
-			http.Error(rw, err.Error(), 500)
-			log.Println(err)
-			return
-		}
-		ar.Prefix = [][]byte{
-			[]byte(fmt.Sprintf("# service=%s", service)),
-			pktline.Flush,
-		}
-		err = ar.Encode(rw)
-		if err != nil {
+		if err = resp.Encode(rw); err != nil {
 			http.Error(rw, err.Error(), 500)
 			log.Println(err)
 			return

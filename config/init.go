@@ -11,4 +11,6 @@ func init() {
 
 	// http server
 	viper.SetDefault("http.port", 8080)
+
+	viper.SetDefault("git.path", ".git/")
 }
