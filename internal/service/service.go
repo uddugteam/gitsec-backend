@@ -46,32 +46,14 @@ func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryNa
 		return nil, fmt.Errorf("failed to create new upload pack session to git: %w", err)
 	}
 
+	defer sess.Close()
+
 	res, err := sess.UploadPack(ctx, upr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload pack to git: %w", err)
 	}
 
 	return res, nil
-
-	/*ep, err := transport.NewEndpoint("/")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create new endpoint: %w", err)
-
-	}
-
-	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath + repositoryName + "/")))
-
-	sess, err := svr.NewUploadPackSession(ep, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create new upload pack session to git: %w", err)
-	}
-
-	res, err := sess.UploadPack(ctx, upr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to upload pack to git: %w", err)
-	}
-
-	return res, nil*/
 }
 
 func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryName string) (*packp.ReportStatus, error) {
@@ -92,6 +74,8 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 		return nil, fmt.Errorf("failed to create new recieve pack session to git: %w", err)
 	}
 
+	defer sess.Close()
+
 	res, err := sess.ReceivePack(ctx, upr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to recieve pack to git: %w", err)
@@ -110,6 +94,8 @@ func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRef
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new git session: %w", err)
 	}
+
+	defer sess.Close()
 
 	ar, err := sess.AdvertisedReferencesContext(ctx)
 	if err != nil {
