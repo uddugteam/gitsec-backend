@@ -12,13 +12,18 @@ import (
 	"gitsec-backend/internal/service"
 )
 
+// HttpServer represents a HTTP server that handles incoming requests
+// and routes them to the appropriate handler functions.
 type HttpServer struct {
+	// contains handler functions for handling different routes
 	handlers *handlers.Handlers
+	// underlying HTTP server instance
 	*http.Server
 }
 
-// NewHttpServer create new Http Server
-// instance and bind it with given port
+// NewHttpServer creates a new HttpServer instance
+// and binds it to the given port. It also initializes
+// the routes and registers them to the server.
 func NewHttpServer(
 	cfg *config.Scheme,
 	srv service.IGitService,
@@ -35,7 +40,8 @@ func NewHttpServer(
 	return server
 }
 
-// registerRoutes register HttpServer instance routes
+// registerRoutes registers the routes to
+// the HttpServer instance.
 func (s *HttpServer) registerRoutes() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

@@ -13,22 +13,35 @@ import (
 	"gitsec-backend/internal/models"
 )
 
+// IGitService defines the interface for Git Service
+// that allows to interact with repositories
 type IGitService interface {
+	// UploadPack handles Git "git-upload-pack" command
+	// and returns UploadPackResponse
 	UploadPack(ctx context.Context, req io.Reader, repositoryName string) (*packp.UploadPackResponse, error)
 
+	// ReceivePack handles Git "git-receive-pack" command
+	// and returns ReportStatus
 	ReceivePack(ctx context.Context, req io.Reader, repositoryName string) (*packp.ReportStatus, error)
 
 	InfoRef(ctx context.Context, repositoryName string, infoRefRequestType models.GitSessionType) (*packp.AdvRefs, error)
 }
 
+// GitService is a Git service implementation
 type GitService struct {
+	// baseGitPath is the base path for the Git
+	// repositories on the file system.
 	baseGitPath string
 }
 
+// NewGitService creates a new GitService instance with
+// the given configuration.
 func NewGitService(cfg *config.Git) *GitService {
 	return &GitService{baseGitPath: cfg.Path}
 }
 
+// UploadPack handles Git "git-upload-pack" command
+// and returns UploadPackResponse
 func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryName string) (*packp.UploadPackResponse, error) {
 	upr := packp.NewUploadPackRequest()
 
@@ -56,6 +69,8 @@ func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryNa
 	return res, nil
 }
 
+// ReceivePack handles Git "git-receive-pack" command
+// and returns ReportStatus
 func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryName string) (*packp.ReportStatus, error) {
 	upr := packp.NewReferenceUpdateRequest()
 
@@ -84,6 +99,8 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 	return res, nil
 }
 
+// InfoRef retrieves advertised refs for given repository
+// and GitSessionType
 func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRefRequestType models.GitSessionType) (*packp.AdvRefs, error) {
 	repo, err := models.NewRepo(repositoryName, g.baseGitPath)
 	if err != nil {
@@ -115,6 +132,8 @@ func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRef
 	return ar, nil
 }
 
+// isRepoExist checks if the repository with
+// the given name exists in the base path.
 func (g *GitService) isRepoExist(repositoryName string) bool {
 	if _, err := os.Stat(g.baseGitPath + repositoryName + "/"); os.IsNotExist(err) {
 		return false

@@ -9,6 +9,9 @@ import (
 	"gitsec-backend/internal"
 )
 
+// Cmd returns the "serve" command of the application.
+// This command is responsible for initializing and
+// running the application.
 func Cmd(app *internal.App) *cobra.Command {
 	return &cobra.Command{
 		Use:   "serve",

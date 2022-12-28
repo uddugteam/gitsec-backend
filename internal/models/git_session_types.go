@@ -5,12 +5,17 @@ import (
 	"strings"
 )
 
-// GitSessionType represent available Git Session Types
+// GitSessionType represents available Git Session Types
 type GitSessionType int
 
 const (
+	// GitSessionReceivePack is the type of session that allows
+	// clients to receive pack data from the server.
 	GitSessionReceivePack GitSessionType = iota
+	// GitSessionUploadPack is the type of session that allows
+	// clients to send pack data to the server.
 	GitSessionUploadPack
+	// GitSessionUnsupported is the type of session that is not supported.
 	GitSessionUnsupported
 )
 
@@ -21,13 +26,13 @@ var gitSessionTypes = [...]string{
 	GitSessionUploadPack:  "git-upload-pack",
 }
 
-// String return GitSessionType enum as a string
+// String returns the GitSessionType as a string
 func (s GitSessionType) String() string {
 	return gitSessionTypes[s]
 }
 
-// GitSessionTypeFromString return new GitSessionType
-// enum from given string
+// GitSessionTypeFromString returns a new GitSessionType
+// enum from the given string
 func GitSessionTypeFromString(s string) (GitSessionType, error) {
 	for i, r := range gitSessionTypes {
 		if strings.ToLower(s) == r {

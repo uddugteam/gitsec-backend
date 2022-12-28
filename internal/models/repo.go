@@ -13,14 +13,21 @@ import (
 	"github.com/go-git/go-git/v5/storage/filesystem"
 )
 
+// Repo represents a local git repository.
 type Repo struct {
-	Name       string
-	BasePath   string
+	// Name is the name of the repository.
+	Name string
+	// BasePath is the base directory path where the repository is stored.
+	BasePath string
+	// fileSystem is the filesystem where the repository is stored.
 	fileSystem billy.Filesystem
-	server     transport.Transport
-	endpoint   *transport.Endpoint
+	// server is the transport server used to handle git sessions.
+	server transport.Transport
+	// endpoint is the transport endpoint used to handle git sessions.
+	endpoint *transport.Endpoint
 }
 
+// NewRepo creates a new Repo instance.
 func NewRepo(name, basePath string) (*Repo, error) {
 	repo := &Repo{
 		Name:     name,
@@ -34,10 +41,13 @@ func NewRepo(name, basePath string) (*Repo, error) {
 	return repo, nil
 }
 
+// FullPath returns the full path to the repository directory.
 func (r *Repo) FullPath() string {
 	return fmt.Sprintf("%s/%s/", r.BasePath, r.Name)
 }
 
+// initRepo initializes the repository
+// by creating the filesystem, server, and endpoint.
 func (r *Repo) initRepo() error {
 	if err := r.initFileSystem(); err != nil {
 		return fmt.Errorf("failed to init repo filesystem: %w", err)
@@ -52,6 +62,8 @@ func (r *Repo) initRepo() error {
 	return nil
 }
 
+// initFileSystem initializes the file system for the repository.
+// If the file system does not already exist, a new repository is created.
 func (r *Repo) initFileSystem() error {
 	r.fileSystem = osfs.New(r.FullPath())
 
@@ -64,10 +76,12 @@ func (r *Repo) initFileSystem() error {
 	return nil
 }
 
+// initServer initializes the server for the repository.
 func (r *Repo) initServer() {
 	r.server = server.NewServer(server.NewFilesystemLoader(r.fileSystem))
 }
 
+// initEndpoint initializes the endpoint for the repository.
 func (r *Repo) initEndpoint() (err error) {
 	r.endpoint, err = transport.NewEndpoint("/")
 	if err != nil {
@@ -76,14 +90,21 @@ func (r *Repo) initEndpoint() (err error) {
 	return
 }
 
+// NewUploadPackSession creates a new UploadPackSession for the repository.
+// The UploadPackSession can be used to perform a git fetch operation.
 func (r *Repo) NewUploadPackSession() (transport.UploadPackSession, error) {
 	return r.server.NewUploadPackSession(r.endpoint, nil)
 }
 
+// NewReceivePackSession creates a new ReceivePackSession for the repository.
+// The ReceivePackSession can be used to perform a git push operation.
 func (r *Repo) NewReceivePackSession() (transport.ReceivePackSession, error) {
 	return r.server.NewReceivePackSession(r.endpoint, nil)
 }
 
+// NewSessionFromType creates a new session of the specified type for the repository.
+// Supported session types are GitSessionUploadPack and GitSessionReceivePack.
+// Returns an error if the session type is not supported.
 func (r *Repo) NewSessionFromType(sessionType GitSessionType) (transport.Session, error) {
 	switch sessionType {
 	case GitSessionReceivePack:
@@ -95,6 +116,8 @@ func (r *Repo) NewSessionFromType(sessionType GitSessionType) (transport.Session
 	}
 }
 
+// isRepoFSExists checks if the filesystem for the repository exists.
+// Returns true if the filesystem exists, false otherwise.
 func (r *Repo) isRepoFSExists() bool {
 	if _, err := os.Stat(r.FullPath()); os.IsNotExist(err) {
 		return false

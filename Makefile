@@ -1,6 +1,6 @@
-APP:=template-service
+APP:=gitsec-backend
 COMMON_PATH	?= $(shell pwd)
-APP_ENTRY_POINT:=cmd/template-service.go
+APP_ENTRY_POINT:=cmd/gitsec-backend.go
 BUILD_OUT_DIR:=./
 
 GOOS	:=

@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GitReceivePack is an HTTP handler that processes a
+// "git-receive-pack" request.
 func (h *Handlers) GitReceivePack() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("content-type", "application/x-git-receive-pack-result")

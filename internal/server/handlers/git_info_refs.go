@@ -10,6 +10,8 @@ import (
 	"gitsec-backend/internal/models"
 )
 
+// InfoRef is an HTTP handler function that handles requests
+// for Git repository information.
 func (h *Handlers) InfoRef() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		infoRefRequestType, err := models.GitSessionTypeFromString(r.URL.Query().Get("service"))

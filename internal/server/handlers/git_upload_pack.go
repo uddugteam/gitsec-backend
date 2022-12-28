@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GitUploadPack is an HTTP handler that processes a
+// "git-upload-pack" request.
 func (h *Handlers) GitUploadPack() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("content-type", "application/x-git-upload-pack-result")
