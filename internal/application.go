@@ -43,7 +43,7 @@ func NewApplication() (app *App, err error) {
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
 	app.srv = service.NewGitService(app.Config().Git)
-	app.httpServer = server.NewHttpServer(app.Config().Http, app.srv)
+	app.httpServer = server.NewHttpServer(app.Config(), app.srv)
 
 	return nil
 }

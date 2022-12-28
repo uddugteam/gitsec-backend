@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Misnaged/annales/logger"
+	"github.com/go-chi/chi/v5"
 )
 
 func (h *Handlers) InfoRef() http.HandlerFunc {
@@ -20,7 +21,7 @@ func (h *Handlers) InfoRef() http.HandlerFunc {
 
 		rw.Header().Set("content-type", fmt.Sprintf("application/x-%s-advertisement", service))
 
-		resp, err := h.srv.InfoRef(r.Context(), "", service)
+		resp, err := h.srv.InfoRef(r.Context(), chi.URLParam(r, repoNamePath), service)
 		if err != nil {
 			http.Error(rw, err.Error(), 500)
 			logger.Log().Error(err)

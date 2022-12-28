@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/andskur/go-git/v5/plumbing/format/pktline"
+	"github.com/andskur/go-git/v5/plumbing/protocol/packp"
+	"github.com/andskur/go-git/v5/plumbing/transport"
+	"github.com/andskur/go-git/v5/plumbing/transport/server"
 	"github.com/go-git/go-billy/v5/osfs"
-	"github.com/go-git/go-git/v5/plumbing/format/pktline"
-	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
-	"github.com/go-git/go-git/v5/plumbing/transport"
-	"github.com/go-git/go-git/v5/plumbing/transport/server"
 
 	"gitsec-backend/config"
 )
@@ -43,7 +43,7 @@ func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryNa
 
 	}
 
-	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath)))
+	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath + repositoryName + "/")))
 
 	sess, err := svr.NewUploadPackSession(ep, nil)
 	if err != nil {
@@ -71,7 +71,7 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 		return nil, fmt.Errorf("failed to create new endpoint: %w", err)
 	}
 
-	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath)))
+	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath + repositoryName + "/")))
 
 	sess, err := svr.NewReceivePackSession(ep, nil)
 	if err != nil {
@@ -92,12 +92,29 @@ const (
 )
 
 func (g *GitService) InfoRef(ctx context.Context, repositoryName, infoRefRequestType string) (*packp.AdvRefs, error) {
+	fs := osfs.New(g.baseGitPath + repositoryName + "/")
+
+	// Initialize the repository
+	/*repo, err := git.Init(filesystem.NewStorage(fs, cache.NewObjectLRU(500)), fs)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(repo)*/
+
+	// Create the .git directory
+	/*err = os.MkdirAll(repoPath, 0700)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}*/
+
+	svr := server.NewServer(server.NewFilesystemLoader(fs))
+
 	ep, err := transport.NewEndpoint("/")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new endpoint: %w", err)
 	}
-
-	svr := server.NewServer(server.NewFilesystemLoader(osfs.New(g.baseGitPath)))
 
 	var sess transport.Session
 
@@ -105,13 +122,15 @@ func (g *GitService) InfoRef(ctx context.Context, repositoryName, infoRefRequest
 	case gitUploadPackType:
 		sess, err = svr.NewUploadPackSession(ep, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create new upload pack session to git: %w", err)
+			return nil, fmt.Errorf("failed to create new ref upload pack session to git: %w", err)
 		}
 	case gitReceivePackType:
 		sess, err = svr.NewReceivePackSession(ep, nil)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create new recieve pack session to git: %w", err)
+			return nil, fmt.Errorf("failed to create new ref recieve pack session to git: %w", err)
 		}
+	default:
+		return nil, fmt.Errorf("invalid info ref request type %v", infoRefRequestType)
 	}
 
 	ar, err := sess.AdvertisedReferencesContext(ctx)
