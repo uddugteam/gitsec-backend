@@ -10,8 +10,6 @@ import (
 
 func (h *Handlers) GitReceivePack() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		log.Printf("httpGitReceivePack %s %s", r.Method, r.URL)
-
 		rw.Header().Set("content-type", "application/x-git-receive-pack-result")
 
 		resp, err := h.srv.ReceivePack(r.Context(), r.Body, chi.URLParam(r, repoNamePath))

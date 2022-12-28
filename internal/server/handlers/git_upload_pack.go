@@ -10,8 +10,6 @@ import (
 
 func (h *Handlers) GitUploadPack() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		log.Printf("httpGitUploadPack %s %s", r.Method, r.URL)
-
 		rw.Header().Set("content-type", "application/x-git-upload-pack-result")
 
 		resp, err := h.srv.UploadPack(r.Context(), r.Body, chi.URLParam(r, repoNamePath))
