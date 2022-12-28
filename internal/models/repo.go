@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andskur/go-git/v5"
-	"github.com/andskur/go-git/v5/plumbing/cache"
-	"github.com/andskur/go-git/v5/plumbing/transport"
-	"github.com/andskur/go-git/v5/plumbing/transport/server"
-	"github.com/andskur/go-git/v5/storage/filesystem"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/osfs"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/server"
+	"github.com/go-git/go-git/v5/storage/filesystem"
 )
 
 type Repo struct {

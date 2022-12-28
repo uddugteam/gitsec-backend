@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/andskur/go-git/v5/plumbing/format/pktline"
-	"github.com/andskur/go-git/v5/plumbing/protocol/packp"
+	"github.com/go-git/go-git/v5/plumbing/format/pktline"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/models"
@@ -105,6 +105,11 @@ func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRef
 	ar.Prefix = [][]byte{
 		[]byte(fmt.Sprintf("# service=%s", infoRefRequestType)),
 		pktline.Flush,
+	}
+
+	if err := ar.Capabilities.Add("no-thin"); err != nil {
+		return nil, fmt.Errorf("failed to add no-thin capability: %w", err)
+
 	}
 
 	return ar, nil
