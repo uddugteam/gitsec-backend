@@ -53,7 +53,7 @@ run:
 	GODEBUG=xray_ptrace=1 go run -race $(APP_ENTRY_POINT) serve
 
 # The build target builds the application for the current system
-build: clean
+build:
 	env CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s ${LDFLAGS}" -o $(BUILD_OUT_DIR)/$(APP) $(APP_ENTRY_POINT)
 
 # The test target runs go test
