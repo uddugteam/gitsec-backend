@@ -6,12 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          go get -u golang.org/x/lint/golint
-      - name: Run lint
-        run: |
-          make lint
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2.5.1
+        with:
+          args: run --enable-all --disable=gochecknoglobals
   test:
     runs-on: ubuntu-latest
     steps:
