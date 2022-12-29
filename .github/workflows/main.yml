@@ -11,7 +11,7 @@ jobs:
           go get -u golang.org/x/lint/golint
       - name: Run lint
         run: |
-          golint -set_exit_status $(go list ./...)
+          make lint
   test:
     runs-on: ubuntu-latest
     steps:
@@ -21,11 +21,11 @@ jobs:
           go get -t -v ./...
       - name: Run tests
         run: |
-          go test -v ./...
+         make test
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build
         run: |
-          go build -o myapp
+          make build
