@@ -3,11 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"io"
-	"os"
-
 	"github.com/go-git/go-git/v5/plumbing/format/pktline"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
+	"io"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/models"
@@ -130,13 +128,4 @@ func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRef
 	}
 
 	return ar, nil
-}
-
-// isRepoExist checks if the repository with
-// the given name exists in the base path.
-func (g *GitService) isRepoExist(repositoryName string) bool {
-	if _, err := os.Stat(g.baseGitPath + repositoryName + "/"); os.IsNotExist(err) {
-		return false
-	}
-	return true
 }

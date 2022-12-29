@@ -26,7 +26,5 @@ func (h *Handlers) GitUploadPack() http.HandlerFunc {
 			log.Println(err)
 			return
 		}
-
-		return
 	}
 }
