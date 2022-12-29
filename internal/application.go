@@ -22,7 +22,7 @@ type App struct {
 
 	version *version.Version
 
-	httpServer *server.HttpServer
+	httpServer *server.HTTPServer
 
 	srv service.IGitService
 }
@@ -43,7 +43,7 @@ func NewApplication() (app *App, err error) {
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
 	app.srv = service.NewGitService(app.Config().Git)
-	app.httpServer = server.NewHttpServer(app.Config(), app.srv)
+	app.httpServer = server.NewHTTPServer(app.Config(), app.srv)
 
 	return nil
 }
@@ -51,7 +51,7 @@ func (app *App) Init() error {
 // Serve start serving Application service
 func (app *App) Serve() error {
 	go func() {
-		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.Http.Port))
+		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.HTTP.Port))
 
 		if err := app.httpServer.ListenAndServe(); err != nil {
 			logger.Log().Fatal(err)

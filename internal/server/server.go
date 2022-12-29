@@ -12,26 +12,26 @@ import (
 	"gitsec-backend/internal/service"
 )
 
-// HttpServer represents a HTTP server that handles incoming requests
+// HTTPServer represents a HTTP server that handles incoming requests
 // and routes them to the appropriate handler functions.
-type HttpServer struct {
+type HTTPServer struct {
 	// contains handler functions for handling different routes
 	handlers *handlers.Handlers
 	// underlying HTTP server instance
 	*http.Server
 }
 
-// NewHttpServer creates a new HttpServer instance
+// NewHTTPServer creates a new HTTPServer instance
 // and binds it to the given port. It also initializes
 // the routes and registers them to the server.
-func NewHttpServer(
+func NewHTTPServer(
 	cfg *config.Scheme,
 	srv service.IGitService,
-) *HttpServer {
-	server := &HttpServer{
+) *HTTPServer {
+	server := &HTTPServer{
 		handlers: handlers.NewHandlers(cfg.Git.Path, srv),
 		Server: &http.Server{
-			Addr: fmt.Sprintf(":%d", cfg.Http.Port),
+			Addr: fmt.Sprintf(":%d", cfg.HTTP.Port),
 		},
 	}
 
@@ -41,8 +41,8 @@ func NewHttpServer(
 }
 
 // registerRoutes registers the routes to
-// the HttpServer instance.
-func (s *HttpServer) registerRoutes() {
+// the HTTPServer instance.
+func (s *HTTPServer) registerRoutes() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
