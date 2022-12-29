@@ -9,7 +9,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2.5.1
         with:
-          args: run --enable-all --disable=gochecknoglobals
+          args: run
   test:
     runs-on: ubuntu-latest
     steps:
