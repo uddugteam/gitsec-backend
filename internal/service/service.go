@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/go-git/go-git/v5/plumbing/format/pktline"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
-	"io"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/models"
