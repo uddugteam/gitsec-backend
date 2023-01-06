@@ -1,4 +1,4 @@
-#GitSec POC v1 Backend
+# GitSec POC v1 Backend
 
 ## Table of Contents
 

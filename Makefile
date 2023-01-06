@@ -8,7 +8,7 @@ APP_ENTRY_POINT:=cmd/gitsec-backend.go
 BUILD_OUT_DIR:=./
 
 # path to versioner package
-GITVER_PKG:=github.com/Misnaged/annales/versioner
+GITVER_PKG:=github.com/misnaged/annales/versioner
 
 # Set GOOS and GOARCH to the current system values using the go env command
 GOOS=$(shell go env GOOS)

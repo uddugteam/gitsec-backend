@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Misnaged/annales/logger"
-	version "github.com/Misnaged/annales/versioner"
+	"github.com/misnaged/annales/logger"
+	version "github.com/misnaged/annales/versioner"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/server"

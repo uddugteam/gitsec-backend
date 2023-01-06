@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Misnaged/annales/logger"
 	"github.com/go-chi/chi/v5"
+	"github.com/misnaged/annales/logger"
 )
 
 // GitUploadPack is an HTTP handler that processes a
