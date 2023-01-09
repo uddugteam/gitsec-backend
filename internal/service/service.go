@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"gitsec-backend/pkg/fs-ipfs"
 	"io"
 
+	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5/plumbing/format/pktline"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
 
@@ -31,12 +33,25 @@ type GitService struct {
 	// baseGitPath is the base path for the Git
 	// repositories on the file system.
 	baseGitPath string
+
+	fs billy.Filesystem
 }
 
 // NewGitService creates a new GitService instance with
 // the given configuration.
-func NewGitService(cfg *config.Git) *GitService {
-	return &GitService{baseGitPath: cfg.Path}
+func NewGitService(cfg *config.Git) (*GitService, error) {
+	fileSystem, err := fs.NewIPFSFilesystem("http://127.0.0.1:5001")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create ipfs filesystem: %w", err)
+	}
+
+	//fileSystem = osfs.New(r.FullPath())
+	//fileSystem := memfs.New()
+
+	return &GitService{
+		baseGitPath: cfg.Path,
+		fs:          fileSystem,
+	}, nil
 }
 
 // UploadPack handles Git "git-upload-pack" command
@@ -48,7 +63,7 @@ func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryNa
 		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
 
-	repo, err := models.NewRepo(repositoryName, g.baseGitPath)
+	repo, err := models.NewRepo(repositoryName, g.baseGitPath, g.fs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new repo: %w", err)
 	}
@@ -78,7 +93,7 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 
 	}
 
-	repo, err := models.NewRepo(repositoryName, g.baseGitPath)
+	repo, err := models.NewRepo(repositoryName, g.baseGitPath, g.fs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new repo: %w", err)
 	}
@@ -101,7 +116,7 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 // InfoRef retrieves advertised refs for given repository
 // and GitSessionType
 func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRefRequestType models.GitSessionType) (*packp.AdvRefs, error) {
-	repo, err := models.NewRepo(repositoryName, g.baseGitPath)
+	repo, err := models.NewRepo(repositoryName, g.baseGitPath, g.fs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new repo: %w", err)
 	}
