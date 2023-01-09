@@ -42,7 +42,7 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() (err error) {
-	app.srv, err = service.NewGitService(app.Config().Git)
+	app.srv, err = service.NewGitService(app.Config())
 	if err != nil {
 		return fmt.Errorf("initialize application service layer: %w", err)
 	}
@@ -79,6 +79,8 @@ func (app *App) Stop() error {
 	if err := app.httpServer.Close(); err != nil {
 		return fmt.Errorf("close httpServer listening: %w", err)
 	}
+
+	app.srv.Close()
 
 	return nil
 }

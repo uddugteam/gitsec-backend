@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	ipfs "github.com/ipfs/go-ipfs-api"
+	"github.com/misnaged/annales/logger"
 )
 
 const separator = filepath.Separator
@@ -78,12 +79,11 @@ func (s *storage) New(path string, mode os.FileMode, flag int) (*IPFSFile, error
 	name := filepath.Base(path)
 
 	f := &IPFSFile{
-		FileName:    name,
-		content:     &content{name: name},
-		Mode:        mode,
-		Flag:        flag,
-		client:      s.client,
-		saveStorage: s.SaveStorage,
+		FileName: name,
+		content:  &content{name: name},
+		Mode:     mode,
+		Flag:     flag,
+		client:   s.client,
 	}
 
 	s.files[path] = f
@@ -219,6 +219,8 @@ func (s *storage) Remove(path string) error {
 const fileSystemBackupPath = ".fs.json"
 
 func (s *storage) LoadStorage() error {
+	logger.Log().Info("opening fs storage...")
+
 	fsFile, err := os.Open(fileSystemBackupPath)
 	if err != nil {
 
@@ -248,18 +250,12 @@ func (s *storage) LoadStorage() error {
 		return fmt.Errorf("failed to unmarshal fs file in storage: %w", err)
 	}
 
-	/*for _, v := range s.files {
-		fmt.Println("=-------")
-		fmt.Println(v.Name())
-		fmt.Println(v.IpfsPath)
-		fmt.Println("=======")
-	}*/
-
+	logger.Log().Info("storage opened")
 	return nil
 }
 
 func (s *storage) SaveStorage() error {
-	return nil
+	logger.Log().Info("saving storage...")
 
 	storageJson, err := json.Marshal(s)
 	if err != nil {
@@ -276,6 +272,7 @@ func (s *storage) SaveStorage() error {
 		return fmt.Errorf("failed to write fs file: %w", err)
 	}
 
+	logger.Log().Info("storage saved")
 	return nil
 }
 

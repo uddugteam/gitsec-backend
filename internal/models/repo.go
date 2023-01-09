@@ -66,13 +66,6 @@ func (r *Repo) initRepo() error {
 // initFileSystem initializes the file system for the repository.
 // If the file system does not already exist, a new repository is created.
 func (r *Repo) initFileSystem() (err error) {
-	/*r.fileSystem, err = fs.NewIPFSFilesystem("http://127.0.0.1:5001")
-	if err != nil {
-		return fmt.Errorf("failed to create ipfs filesystem: %w", err)
-	}*/
-	//r.fileSystem = osfs.New(r.FullPath())
-	//r.fileSystem = memfs.New()
-
 	if !r.isRepoFSExists() {
 		if _, err := git.Init(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), r.fileSystem); err != nil {
 			if errors.Is(err, git.ErrRepositoryAlreadyExists) {
