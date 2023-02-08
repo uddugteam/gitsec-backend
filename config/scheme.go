@@ -10,6 +10,9 @@ type Scheme struct {
 
 	// Git is the configuration for the Git server.
 	Git *Git
+
+	// Ipfs is the configuration for the Ipfs client.
+	Ipfs *Ipfs
 }
 
 // HTTP represents the HTTP server configuration scheme.
@@ -22,4 +25,10 @@ type HTTP struct {
 type Git struct {
 	// Path is the path to the Git repositories.
 	Path string
+}
+
+// Ipfs represent Ipfs client configuration scheme.
+type Ipfs struct {
+	// Address of Ipfs node
+	Address string
 }

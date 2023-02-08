@@ -1,11 +1,11 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/go-git/go-billy/v5"
-	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/transport"
@@ -28,10 +28,11 @@ type Repo struct {
 }
 
 // NewRepo creates a new Repo instance.
-func NewRepo(name, basePath string) (*Repo, error) {
+func NewRepo(name, basePath string, fs billy.Filesystem) (*Repo, error) {
 	repo := &Repo{
-		Name:     name,
-		BasePath: basePath,
+		Name:       name,
+		BasePath:   basePath,
+		fileSystem: fs,
 	}
 
 	if err := repo.initRepo(); err != nil {
@@ -64,11 +65,12 @@ func (r *Repo) initRepo() error {
 
 // initFileSystem initializes the file system for the repository.
 // If the file system does not already exist, a new repository is created.
-func (r *Repo) initFileSystem() error {
-	r.fileSystem = osfs.New(r.FullPath())
-
+func (r *Repo) initFileSystem() (err error) {
 	if !r.isRepoFSExists() {
 		if _, err := git.Init(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), r.fileSystem); err != nil {
+			if errors.Is(err, git.ErrRepositoryAlreadyExists) {
+				return nil
+			}
 			return fmt.Errorf("failed to create new repo on fs: %w", err)
 		}
 	}
@@ -119,7 +121,8 @@ func (r *Repo) NewSessionFromType(sessionType GitSessionType) (transport.Session
 // isRepoFSExists checks if the filesystem for the repository exists.
 // Returns true if the filesystem exists, false otherwise.
 func (r *Repo) isRepoFSExists() bool {
-	if _, err := os.Stat(r.FullPath()); os.IsNotExist(err) {
+	if _, err := r.fileSystem.Stat(r.FullPath()); os.IsNotExist(err) {
+		//if _, err := r.fileSystem.Stat(r.Name); os.IsNotExist(err) {
 		return false
 	}
 	return true

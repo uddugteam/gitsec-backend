@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -41,8 +43,12 @@ func NewApplication() (app *App, err error) {
 }
 
 // Init initialize application and all necessary instances
-func (app *App) Init() error {
-	app.srv = service.NewGitService(app.Config().Git)
+func (app *App) Init() (err error) {
+	app.srv, err = service.NewGitService(app.Config())
+	if err != nil {
+		return fmt.Errorf("initialize application service layer: %w", err)
+	}
+
 	app.httpServer = server.NewHTTPServer(app.Config(), app.srv)
 
 	return nil
@@ -54,7 +60,9 @@ func (app *App) Serve() error {
 		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.HTTP.Port))
 
 		if err := app.httpServer.ListenAndServe(); err != nil {
-			logger.Log().Fatal(err)
+			if !errors.Is(err, http.ErrServerClosed) {
+				logger.Log().Error(err)
+			}
 		}
 	}()
 
@@ -75,6 +83,8 @@ func (app *App) Stop() error {
 	if err := app.httpServer.Close(); err != nil {
 		return fmt.Errorf("close httpServer listening: %w", err)
 	}
+
+	app.srv.Close()
 
 	return nil
 }

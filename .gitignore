@@ -21,3 +21,7 @@ __debug_bin
 .repos/
 
 gitsec-backend
+
+local/
+
+.fs.json

@@ -13,4 +13,6 @@ func init() {
 	viper.SetDefault("http.port", 8080)
 
 	viper.SetDefault("git.path", ".repos/")
+
+	viper.SetDefault("ipfs.address", "http://127.0.0.1:5001")
 }
