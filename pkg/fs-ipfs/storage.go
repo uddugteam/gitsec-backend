@@ -116,7 +116,9 @@ func (s *storage) New(path string, mode os.FileMode, flag int) (*IPFSFile, error
 		return nil, fmt.Errorf("failed to create parent directory for file %q: %w", path, err)
 	}
 
-	f.fillContent()
+	if err := f.fillContent(); err != nil {
+		return nil, fmt.Errorf("failed to fill content: %w", err)
+	}
 	return f, nil
 }
 
@@ -283,7 +285,7 @@ func (s *storage) Remove(path string) error {
 	return nil
 }
 
-const fileSystemBackupPath = ".fs.json"
+//const fileSystemBackupPath = ".fs.json"
 
 /*
 func (s *storage) LoadStorage() error {
