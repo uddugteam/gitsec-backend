@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +11,6 @@ import (
 	"github.com/go-git/go-billy/v5/helper/chroot"
 	"github.com/go-git/go-billy/v5/util"
 	ipfs "github.com/ipfs/go-ipfs-api"
-	"github.com/misnaged/annales/logger"
 )
 
 // IPFSFilesystem is a filesystem implementation
@@ -32,9 +30,9 @@ func NewIPFSFilesystem(clientAddr string, stop chan struct{}) (billy.Filesystem,
 		stop: stop,
 	}
 
-	if err := fs.s.LoadStorage(); err != nil {
+	/*if err := fs.s.LoadStorage(); err != nil {
 		return nil, fmt.Errorf("failed to load storage: %w", err)
-	}
+	}*/
 
 	go fs.waitStop()
 
@@ -182,7 +180,7 @@ func (fs *IPFSFilesystem) Join(elem ...string) string {
 // TempFile creates a new temporary file in the directory dir with a name
 // beginning with prefix, opens the file for reading and writing, and
 // returns the resulting *os.File. If dir is the empty string, TempFile
-// uses the default directory for temporary files (see os.TempDir).
+// uses the default directory for temporary Files (see os.TempDir).
 // Multiple programs calling TempFile simultaneously will not choose the same file.
 // The caller can use f.Name() to find the pathname of the file. It is the caller's
 // responsibility to remove the file when no longer needed.
@@ -205,7 +203,7 @@ func (fs *IPFSFilesystem) ReadDir(path string) ([]os.FileInfo, error) {
 	}
 
 	var entries []os.FileInfo
-	for _, f := range fs.s.Children(path) {
+	for _, f := range fs.s.Childrens(path) {
 		fi, _ := f.Stat()
 		entries = append(entries, fi)
 	}
@@ -274,12 +272,10 @@ func (fs *IPFSFilesystem) Readlink(link string) (string, error) {
 	return string(f.content.bytes), nil
 }
 
-// Save saves the storage to the filesystem.
-func (fs *IPFSFilesystem) Save() error {
-	return fs.s.SaveStorage()
+// Capabilities implements the Capable interface.
+func (fs *IPFSFilesystem) Capabilities() billy.Capability {
+	return billy.DefaultCapabilities
 }
-
-var errNotLink = errors.New("not a link")
 
 // resolveLink resolves the target of the given symbolic link
 // and returns the target and a boolean indicating whether
@@ -301,9 +297,9 @@ func (fs *IPFSFilesystem) resolveLink(fullpath string, f *IPFSFile) (target stri
 // and saves the storage to the filesystem.
 func (fs *IPFSFilesystem) waitStop() {
 	<-fs.stop
-	if err := fs.s.SaveStorage(); err != nil {
+	/*if err := fs.s.SaveStorage(); err != nil {
 		logger.Log().Errorf("failed to save storage: %v", err)
-	}
+	}*/
 }
 
 // On Windows OS, IsAbs validates if a path is valid based on if stars with a

@@ -61,7 +61,6 @@ You can also clone the repository using the git clone command:
 $ git clone http://localhost:8080/repos/repo.git
 ```
 
-
 ## Configuration
 The following environment variables can be used to configure the server:
 
@@ -76,10 +75,13 @@ The following environment variables can be used to configure the server:
 * `make lint`: Runs the linter to check
 
 ## Todo
+- [x] Add support for IPFS storage
+- [x] Add performance optimisation for IPFS storage
+- [ ] Add support for onchain registry
+- [ ] Add repository management features
 - [ ] Add support for SSH protocol
 - [ ] Add authentication
 - [ ] Add SSL/TLS support
-- [ ] Add repository management features
 - [ ] Add Git hooks support
 
 ## Contributing

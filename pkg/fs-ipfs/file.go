@@ -2,6 +2,7 @@ package fs
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -42,9 +43,66 @@ type IPFSFile struct {
 	updateOriginal func(ipfsPath string)
 }
 
+// MarshalJSON marshals the storage instance
+// into a JSON representation.
+func (f *IPFSFile) MarshalJSON() ([]byte, error) {
+	storageJson := struct {
+		FileName string
+		IpfsPath string
+		Position int64
+		Flag     int
+		Mode     uint32
+	}{
+		FileName: f.FileName,
+		IpfsPath: f.IpfsPath,
+		Position: f.Position,
+		Flag:     f.Flag,
+		Mode:     uint32(f.Mode),
+	}
+
+	return json.Marshal(storageJson)
+}
+
+func (f *IPFSFile) UnmarshalJSON(i []byte) error {
+	mm := make(map[string]interface{})
+
+	err := json.Unmarshal(i, &mm)
+	if err != nil {
+		return err
+	}
+
+	f.FileName = mm["FileName"].(string)
+	f.IpfsPath = mm["IpfsPath"].(string)
+	f.Position = int64(mm["Position"].(float64))
+	f.Flag = int(mm["Flag"].(float64))
+	f.Mode = os.FileMode(mm["Mode"].(float64))
+
+	return nil
+}
+
 // Name returns the name of the file.
 func (f *IPFSFile) Name() string {
 	return f.FileName
+}
+
+func (f *IPFSFile) fillContent() error {
+	// Fetch file from IPFS and store in memory.
+	ipfsFileReader, err := f.client.Cat(f.IpfsPath)
+	if err != nil {
+		return fmt.Errorf("can't find file content on %s path", f.IpfsPath)
+	}
+	defer ipfsFileReader.Close()
+
+	var buffer bytes.Buffer
+	if _, err := buffer.ReadFrom(ipfsFileReader); err != nil {
+		return fmt.Errorf("error to read file: %w", err)
+	}
+
+	f.content = &content{
+		name:  f.FileName,
+		bytes: buffer.Bytes(),
+	}
+	return nil
 }
 
 // Read reads data from the file. If the file has not yet been loaded from IPFS, it will be
@@ -54,20 +112,10 @@ func (f *IPFSFile) Read(b []byte) (int, error) {
 	defer f.mu.Unlock()
 	f.mu.Lock()
 
-	if f.content.bytes == nil && f.IpfsPath != "" {
-		// Fetch file from IPFS and store in memory.
-		ipfsFileReader, err := f.client.Cat(f.IpfsPath)
-		if err != nil {
-			return 0, fmt.Errorf("can't find file content on %s path", f.IpfsPath)
+	if f.content == nil && f.IpfsPath != "" {
+		if err := f.fillContent(); err != nil {
+			return 0, fmt.Errorf("failed to fill IPFSFile content: %w", err)
 		}
-		defer ipfsFileReader.Close()
-
-		var buffer bytes.Buffer
-		if _, err := buffer.ReadFrom(ipfsFileReader); err != nil {
-			return 0, fmt.Errorf("error to read file: %w", err)
-		}
-
-		f.content.bytes = buffer.Bytes()
 	}
 
 	n, err := f.ReadAt(b, f.Position)
@@ -100,6 +148,10 @@ func (f *IPFSFile) Write(b []byte) (int, error) {
 	}
 
 	n, err := f.content.WriteAt(b, f.Position)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	f.Position += int64(n)
 
 	hash, err := f.client.Add(bytes.NewReader(b))
@@ -329,5 +381,9 @@ func (c *content) Truncate() {
 
 // Len returns the length of the content slice.
 func (c *content) Len() int {
+	if c == nil {
+		return 0
+	}
+
 	return len(c.bytes)
 }

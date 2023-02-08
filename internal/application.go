@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -58,7 +60,9 @@ func (app *App) Serve() error {
 		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.HTTP.Port))
 
 		if err := app.httpServer.ListenAndServe(); err != nil {
-			logger.Log().Fatal(err)
+			if !errors.Is(err, http.ErrServerClosed) {
+				logger.Log().Error(err)
+			}
 		}
 	}()
 

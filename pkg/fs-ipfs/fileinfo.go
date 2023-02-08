@@ -6,7 +6,7 @@ import (
 )
 
 // fileInfo is an implementation of the os.FileInfo
-// interface for IPFS files.
+// interface for IPFS Files.
 type fileInfo struct {
 	// name is the name of the file.
 	name string

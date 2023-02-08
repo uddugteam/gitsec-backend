@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/misnaged/annales/logger"
 	"io"
 	"time"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5/plumbing/format/pktline"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
+	"github.com/misnaged/annales/logger"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/models"
