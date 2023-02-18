@@ -13,6 +13,13 @@ type Scheme struct {
 
 	// Ipfs is the configuration for the Ipfs client.
 	Ipfs *Ipfs
+
+	Blockchain *Blockchain
+
+	// ETH account private key that will be using to sign outcoming transactions
+	Signer string
+
+	Baseurl string
 }
 
 // HTTP represents the HTTP server configuration scheme.
@@ -31,4 +38,11 @@ type Git struct {
 type Ipfs struct {
 	// Address of Ipfs node
 	Address string
+}
+
+type Blockchain struct {
+	Name     string
+	Network  string
+	Rpc      string
+	Contract string
 }
