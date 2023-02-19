@@ -11,8 +11,19 @@ type Scheme struct {
 	// Git is the configuration for the Git server.
 	Git *Git
 
+	Pinner string
+
 	// Ipfs is the configuration for the Ipfs client.
 	Ipfs *Ipfs
+
+	Pinata *Pinata
+
+	Blockchain *Blockchain
+
+	// ETH account private key that will be using to sign outcoming transactions
+	Signer string
+
+	Baseurl string
 }
 
 // HTTP represents the HTTP server configuration scheme.
@@ -31,4 +42,15 @@ type Git struct {
 type Ipfs struct {
 	// Address of Ipfs node
 	Address string
+}
+
+type Pinata struct {
+	Jwt string
+}
+
+type Blockchain struct {
+	Name     string
+	Network  string
+	Rpc      string
+	Contract string
 }

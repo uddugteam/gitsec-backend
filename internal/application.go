@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/misnaged/annales/logger"
 	version "github.com/misnaged/annales/versioner"
 
@@ -23,6 +25,8 @@ type App struct {
 	config *config.Scheme
 
 	version *version.Version
+
+	blockchain *ethclient.Client
 
 	httpServer *server.HTTPServer
 
@@ -44,7 +48,11 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() (err error) {
-	app.srv, err = service.NewGitService(app.Config())
+	if err := app.initBlockchain(app.Config().Blockchain); err != nil {
+		return fmt.Errorf("initializr application blockchain: %w", err)
+	}
+
+	app.srv, err = service.NewGitService(app.Config(), app.blockchain)
 	if err != nil {
 		return fmt.Errorf("initialize application service layer: %w", err)
 	}
@@ -54,8 +62,28 @@ func (app *App) Init() (err error) {
 	return nil
 }
 
+// initBlockchain initialize Application Ethereum clients
+func (app *App) initBlockchain(cfg *config.Blockchain) (err error) {
+	logger.Log().Infof("connection to %s-%s blockchain on %s establishing...", cfg.Name, cfg.Network, cfg.Rpc)
+
+	app.blockchain, err = ethclient.Dial(cfg.Rpc)
+	if err != nil {
+		return fmt.Errorf("connecting to %s-%s node at %s: %w", cfg.Name, cfg.Network, cfg.Rpc, err)
+	}
+
+	if _, err := app.blockchain.NetworkID(context.Background()); err != nil {
+		return fmt.Errorf("fetch %s-%s chain id: %w", cfg.Name, cfg.Network, err)
+	}
+
+	logger.Log().Infof("connection to to %s-%s blockchain established on %s", cfg.Name, cfg.Network, cfg.Rpc)
+
+	return nil
+}
+
 // Serve start serving Application service
 func (app *App) Serve() error {
+	go app.srv.StartListener()
+
 	go func() {
 		logger.Log().Info(fmt.Sprintf("Listen HTTP Server on :%d", app.config.HTTP.Port))
 
@@ -85,6 +113,8 @@ func (app *App) Stop() error {
 	}
 
 	app.srv.Close()
+
+	app.blockchain.Close()
 
 	return nil
 }

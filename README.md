@@ -76,7 +76,7 @@ The following environment variables can be used to configure the server:
 
 ## Todo
 - [x] Add support for IPFS storage
-- [ ] Add support for onchain registry
+- [x] Add support for onchain registry
 - [ ] Add disaster recovery for repo storage
 - [ ] Add performance optimisation for IPFS storage
 - [ ] Add support for SSH protocols
