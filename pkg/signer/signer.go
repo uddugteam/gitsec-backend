@@ -33,9 +33,9 @@ func NewSigner(privateKeyString string, gasLimit uint) (*Signer, error) {
 	}
 
 	return &Signer{
-		Address: crypto.PubkeyToAddress(*publicKeyECDSA),
-		private: privateKey,
-		//gasLimit: gasLimit,
+		Address:  crypto.PubkeyToAddress(*publicKeyECDSA),
+		private:  privateKey,
+		gasLimit: 200000,
 	}, nil
 }
 

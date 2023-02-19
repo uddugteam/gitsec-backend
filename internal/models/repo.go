@@ -46,12 +46,13 @@ type Repo struct {
 }
 
 // NewRepo creates a new Repo instance.
-func NewRepo(name, basePath string, id int, owner common.Address, fs billy.Filesystem) (*Repo, error) {
+func NewRepo(name, description, basePath string, id int, owner common.Address, fs billy.Filesystem) (*Repo, error) {
 	repo := &Repo{
-		Name:     name,
-		BasePath: basePath,
-		ID:       id,
-		Owner:    owner,
+		Name:        name,
+		Description: description,
+		BasePath:    basePath,
+		ID:          id,
+		Owner:       owner,
 	}
 
 	if err := repo.InitRepo(fs); err != nil {
@@ -203,7 +204,7 @@ func (r *Repo) Tree(hash plumbing.Hash) (*object.Tree, error) {
 func (r *Repo) GenMeta() (*RepoMetadata, error) {
 	meta := &RepoMetadata{
 		Name:         r.Name,
-		Description:  "repos",
+		Description:  r.Description,
 		ExternalUrl:  viper.GetString("baseurl") + r.Name,
 		Tree:         []*RepoFile{},
 		Commit:       "repository created",

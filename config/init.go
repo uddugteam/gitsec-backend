@@ -25,4 +25,8 @@ func init() {
 
 	// signer private key
 	viper.SetDefault("signer", "")
+
+	viper.SetDefault("pinata.jwt", "")
+
+	viper.SetDefault("pinner", "pinata")
 }

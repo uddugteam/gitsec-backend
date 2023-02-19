@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-git/go-billy/v5/osfs"
-	"gitsec-backend/pkg/signer"
 	"io"
 	"math/big"
 	"time"
@@ -15,15 +13,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-git/go-billy/v5"
+	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5/plumbing/format/pktline"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
-	ipfs "github.com/ipfs/go-ipfs-api"
 	"github.com/misnaged/annales/logger"
 
 	"gitsec-backend/config"
 	"gitsec-backend/internal/models"
 	"gitsec-backend/internal/repository"
 	"gitsec-backend/pkg/contract"
+	"gitsec-backend/pkg/pinner"
+	"gitsec-backend/pkg/signer"
 )
 
 // IGitService defines the interface for Git Service
@@ -54,7 +54,7 @@ type GitService struct {
 
 	fs billy.Filesystem
 
-	ipfs *ipfs.Shell
+	pinner pinner.IPinner
 
 	blockchain *ethclient.Client
 
@@ -100,10 +100,21 @@ func NewGitService(cfg *config.Scheme, blockchain *ethclient.Client) (*GitServic
 		return nil, fmt.Errorf("failed to create signer: %w", err)
 	}
 
+	var pinnerService pinner.IPinner
+
+	switch cfg.Pinner {
+	case "pinata":
+		pinnerService = pinner.NewPinataPinner(cfg.Pinata.Jwt)
+	case "ipfs":
+		pinnerService = pinner.NewIpfsPinner(cfg.Ipfs.Address)
+	default:
+		return nil, fmt.Errorf("unsupported pinner %s", cfg.Pinner)
+	}
+
 	return &GitService{
 		baseGitPath:     cfg.Git.Path,
 		fs:              fileSystem,
-		ipfs:            ipfs.NewShell(cfg.Ipfs.Address),
+		pinner:          pinnerService,
 		blockchain:      blockchain,
 		contract:        gitSecContract,
 		repository:      repository.NewRepository(),
@@ -145,15 +156,15 @@ Subscribe:
 		case r := <-repos:
 			logger.Log().Infof("catch repository creation event: repository %s with ID %d created with owner %s", r.RepName, r.RepId, r.Owner.Hex())
 
-			if err := g.CreateRepo(r.RepName, int(r.RepId.Int64()), r.Owner); err != nil {
+			if err := g.CreateRepo(r.RepName, r.Description, int(r.RepId.Int64()), r.Owner); err != nil {
 				logger.Log().Error(fmt.Errorf("error to create repository: %w", err))
 			}
 		}
 	}
 }
 
-func (g *GitService) CreateRepo(name string, id int, owner common.Address) error {
-	repo, err := models.NewRepo(name, g.baseGitPath, id, owner, g.fs)
+func (g *GitService) CreateRepo(name, description string, id int, owner common.Address) error {
+	repo, err := models.NewRepo(name, description, g.baseGitPath, id, owner, g.fs)
 	if err != nil {
 		return fmt.Errorf("failed to create new repo: %w", err)
 	}
@@ -168,12 +179,12 @@ func (g *GitService) CreateRepo(name string, id int, owner common.Address) error
 		return fmt.Errorf("marshal repository metadata: %w", err)
 	}
 
-	hash, err := g.ipfs.Add(bytes.NewReader(metaJson))
+	hash, err := g.pinner.Pin(name+"-meta.json", bytes.NewReader(metaJson))
 	if err != nil {
-		return fmt.Errorf("add repository metadata to ipfs: %w", err)
+		return fmt.Errorf("pin repository metadata to ipfs: %w", err)
 	}
 
-	logger.Log().Infof("repository %s metadata %s added to IPFS", name, hash)
+	logger.Log().Infof("repository %s metadata %s pinned to IPFS", name, hash)
 
 	repo.Metadata = hash
 
@@ -181,7 +192,25 @@ func (g *GitService) CreateRepo(name string, id int, owner common.Address) error
 		return fmt.Errorf("failed to create repository: %w", err)
 	}
 
-	logger.Log().Infof("repository %s created", name)
+	logger.Log().Infof("repository %s ID %d created", repo.Name, repo.ID)
+
+	sign, err := g.signer.Sign(g.chainId)
+	if err != nil {
+		return fmt.Errorf("prepare tx signing: %w", err)
+	}
+
+	tx, err := g.contract.UpdateIPFS(sign, big.NewInt(int64(repo.ID)), hash)
+	if err != nil {
+		return fmt.Errorf("failed to send transaction: %w", err)
+	}
+
+	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), name, repo.ID, hash)
+
+	rewrewr := &models.Repo{Name: name}
+
+	if err := g.repository.GetRepo(rewrewr); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -196,11 +225,6 @@ func (g *GitService) UploadPack(ctx context.Context, req io.Reader, repositoryNa
 	if err := upr.Decode(req); err != nil {
 		return nil, fmt.Errorf("failed to decode request: %w", err)
 	}
-
-	/*repo, err := models.NewRepo(repositoryName, g.baseGitPath, 0, common.Address{}, g.fs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create new repo: %w", err)
-	}*/
 
 	repo := &models.Repo{Name: repositoryName}
 
@@ -299,12 +323,12 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 		return nil, fmt.Errorf("marshal repository metadata: %w", err)
 	}
 
-	hash, err := g.ipfs.Add(bytes.NewReader(metaBytes))
+	hash, err := g.pinner.Pin(fmt.Sprintf("%s-%d-meta.json", repositoryName, time.Now().Unix()), bytes.NewReader(metaBytes))
 	if err != nil {
-		return nil, fmt.Errorf("add repository metadata to ipfs: %w", err)
+		return nil, fmt.Errorf("pin repository metadata to ipfs: %w", err)
 	}
 
-	logger.Log().Infof("repository %s metadata %s added to IPFS", repositoryName, hash)
+	logger.Log().Infof("repository %s metadata %s pinned to IPFS", repositoryName, hash)
 
 	repo.Metadata = hash
 
@@ -318,17 +342,19 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 		return nil, fmt.Errorf("failed to send transaction: %w", err)
 	}
 
-	logger.Log().Infof("transaction %s to update repository %s metadata %s send to blockchan", tx.Hash().Hex(), repositoryName, hash)
+	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), repositoryName, repo.ID, hash)
 
 	return res, nil
 }
 
 func (g *GitService) StoreMetaTree(meta *models.RepoMetadata, repo *models.Repo) error {
 	for _, f := range meta.Tree {
-		hash, err := g.ipfs.Add(bytes.NewReader([]byte(f.Content)))
+		hash, err := g.pinner.Pin(fmt.Sprintf("%s-%d.json", meta.Name, time.Now().Unix()), bytes.NewReader([]byte(f.Content)))
 		if err != nil {
-			return fmt.Errorf("failed to add file %s to ipfs: %w", f.Name, err)
+			return fmt.Errorf("pin file %s to ipfs: %w", f.Name, err)
 		}
+
+		logger.Log().Infof("file %s %s pinned to IPFS", f.Name, hash)
 
 		fileMeta := &models.RepoFile{
 			Name:      f.Name,
@@ -343,10 +369,12 @@ func (g *GitService) StoreMetaTree(meta *models.RepoMetadata, repo *models.Repo)
 			return fmt.Errorf("failed to marshal file meta: %w", err)
 		}
 
-		metaHash, err := g.ipfs.Add(bytes.NewReader(fileJson))
+		metaHash, err := g.pinner.Pin(fmt.Sprintf("%s-%d-meta.json", meta.Name, time.Now().Unix()), bytes.NewReader(fileJson))
 		if err != nil {
-			return fmt.Errorf("failed to add file %s to ipfs: %w", f.Name, err)
+			return fmt.Errorf("pin file %s metadata to ipfs: %w", f.Name, err)
 		}
+
+		logger.Log().Infof("file %s metadata %s pinned to IPFS", f.Name, metaHash)
 
 		f.Hash = metaHash
 	}
@@ -357,11 +385,6 @@ func (g *GitService) StoreMetaTree(meta *models.RepoMetadata, repo *models.Repo)
 // InfoRef retrieves advertised refs for given repository
 // and GitSessionType
 func (g *GitService) InfoRef(ctx context.Context, repositoryName string, infoRefRequestType models.GitSessionType) (*packp.AdvRefs, error) {
-	/*repo, err := models.NewRepo(repositoryName, g.baseGitPath, 0, common.Address{}, g.fs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create new repo: %w", err)
-	}*/
-
 	logger.Log().Infof("handling InfoRef request for repo %s", repositoryName)
 
 	repo := &models.Repo{Name: repositoryName}

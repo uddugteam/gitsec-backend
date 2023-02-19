@@ -35,11 +35,13 @@ type GitsecRepository struct {
 	Description string
 	Owner       common.Address
 	IPFS        string
+	LastUpdate  *big.Int
+	ForkedFrom  string
 }
 
 // ContractMetaData contains all meta data concerning the Contract contract.
 var ContractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ApprovalCallerNotOwnerNorApproved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ApprovalQueryForNonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BalanceQueryForZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintERC2309QuantityExceedsLimit\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintToZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintZeroQuantity\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnerQueryForNonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnershipNotInitializedForExtraData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferCallerNotOwnerNorApproved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFromIncorrectOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferToNonERC721ReceiverImplementer\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferToZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"URIQueryForNonexistentToken\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"toTokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"ConsecutiveTransfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"repId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"}],\"name\":\"IPFSHashUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"repId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"repName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"RepositoryCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"name\":\"createRepository\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"deleteRepository\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllRepositories\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"getRepository\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getUserRepositories\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"setAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newDescription\",\"type\":\"string\"}],\"name\":\"updateDescription\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newIPFS\",\"type\":\"string\"}],\"name\":\"updateIPFS\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ApprovalCallerNotOwnerNorApproved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ApprovalQueryForNonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BalanceQueryForZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintERC2309QuantityExceedsLimit\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintToZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MintZeroQuantity\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnerQueryForNonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnershipNotInitializedForExtraData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferCallerNotOwnerNorApproved\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferFromIncorrectOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferToNonERC721ReceiverImplementer\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TransferToZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"URIQueryForNonexistentToken\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"toTokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"ConsecutiveTransfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"repId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"}],\"name\":\"IPFSHashUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"repId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"repName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"name\":\"RepositoryCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"repId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"repName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"url\",\"type\":\"string\"}],\"name\":\"RepositoryForked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"name\":\"createRepository\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"deleteRepository\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"url\",\"type\":\"string\"}],\"name\":\"forkRepository\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllRepositories\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"forkedFrom\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"getRepository\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"forkedFrom\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getUserRepositories\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"IPFS\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"forkedFrom\",\"type\":\"string\"}],\"internalType\":\"structGitsec.Repository[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"setAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newDescription\",\"type\":\"string\"}],\"name\":\"updateDescription\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newIPFS\",\"type\":\"string\"}],\"name\":\"updateIPFS\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ContractABI is the input ABI used to generate the binding from.
@@ -252,7 +254,7 @@ func (_Contract *ContractCallerSession) BalanceOf(owner common.Address) (*big.In
 
 // GetAllRepositories is a free data retrieval call binding the contract method 0x7fcc83be.
 //
-// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string)[])
+// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractCaller) GetAllRepositories(opts *bind.CallOpts) ([]GitsecRepository, error) {
 	var out []interface{}
 	err := _Contract.contract.Call(opts, &out, "getAllRepositories")
@@ -269,14 +271,14 @@ func (_Contract *ContractCaller) GetAllRepositories(opts *bind.CallOpts) ([]Gits
 
 // GetAllRepositories is a free data retrieval call binding the contract method 0x7fcc83be.
 //
-// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string)[])
+// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractSession) GetAllRepositories() ([]GitsecRepository, error) {
 	return _Contract.Contract.GetAllRepositories(&_Contract.CallOpts)
 }
 
 // GetAllRepositories is a free data retrieval call binding the contract method 0x7fcc83be.
 //
-// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string)[])
+// Solidity: function getAllRepositories() view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractCallerSession) GetAllRepositories() ([]GitsecRepository, error) {
 	return _Contract.Contract.GetAllRepositories(&_Contract.CallOpts)
 }
@@ -314,7 +316,7 @@ func (_Contract *ContractCallerSession) GetApproved(tokenId *big.Int) (common.Ad
 
 // GetRepository is a free data retrieval call binding the contract method 0x5be08933.
 //
-// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string))
+// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string,uint256,string))
 func (_Contract *ContractCaller) GetRepository(opts *bind.CallOpts, id *big.Int) (GitsecRepository, error) {
 	var out []interface{}
 	err := _Contract.contract.Call(opts, &out, "getRepository", id)
@@ -331,21 +333,21 @@ func (_Contract *ContractCaller) GetRepository(opts *bind.CallOpts, id *big.Int)
 
 // GetRepository is a free data retrieval call binding the contract method 0x5be08933.
 //
-// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string))
+// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string,uint256,string))
 func (_Contract *ContractSession) GetRepository(id *big.Int) (GitsecRepository, error) {
 	return _Contract.Contract.GetRepository(&_Contract.CallOpts, id)
 }
 
 // GetRepository is a free data retrieval call binding the contract method 0x5be08933.
 //
-// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string))
+// Solidity: function getRepository(uint256 id) view returns((uint256,string,string,address,string,uint256,string))
 func (_Contract *ContractCallerSession) GetRepository(id *big.Int) (GitsecRepository, error) {
 	return _Contract.Contract.GetRepository(&_Contract.CallOpts, id)
 }
 
 // GetUserRepositories is a free data retrieval call binding the contract method 0x7d2d7e30.
 //
-// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string)[])
+// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractCaller) GetUserRepositories(opts *bind.CallOpts, user common.Address) ([]GitsecRepository, error) {
 	var out []interface{}
 	err := _Contract.contract.Call(opts, &out, "getUserRepositories", user)
@@ -362,14 +364,14 @@ func (_Contract *ContractCaller) GetUserRepositories(opts *bind.CallOpts, user c
 
 // GetUserRepositories is a free data retrieval call binding the contract method 0x7d2d7e30.
 //
-// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string)[])
+// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractSession) GetUserRepositories(user common.Address) ([]GitsecRepository, error) {
 	return _Contract.Contract.GetUserRepositories(&_Contract.CallOpts, user)
 }
 
 // GetUserRepositories is a free data retrieval call binding the contract method 0x7d2d7e30.
 //
-// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string)[])
+// Solidity: function getUserRepositories(address user) view returns((uint256,string,string,address,string,uint256,string)[])
 func (_Contract *ContractCallerSession) GetUserRepositories(user common.Address) ([]GitsecRepository, error) {
 	return _Contract.Contract.GetUserRepositories(&_Contract.CallOpts, user)
 }
@@ -683,6 +685,27 @@ func (_Contract *ContractSession) DeleteRepository(id *big.Int) (*types.Transact
 // Solidity: function deleteRepository(uint256 id) returns()
 func (_Contract *ContractTransactorSession) DeleteRepository(id *big.Int) (*types.Transaction, error) {
 	return _Contract.Contract.DeleteRepository(&_Contract.TransactOpts, id)
+}
+
+// ForkRepository is a paid mutator transaction binding the contract method 0x1e8428b1.
+//
+// Solidity: function forkRepository(string name, string description, string url) returns(uint256)
+func (_Contract *ContractTransactor) ForkRepository(opts *bind.TransactOpts, name string, description string, url string) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "forkRepository", name, description, url)
+}
+
+// ForkRepository is a paid mutator transaction binding the contract method 0x1e8428b1.
+//
+// Solidity: function forkRepository(string name, string description, string url) returns(uint256)
+func (_Contract *ContractSession) ForkRepository(name string, description string, url string) (*types.Transaction, error) {
+	return _Contract.Contract.ForkRepository(&_Contract.TransactOpts, name, description, url)
+}
+
+// ForkRepository is a paid mutator transaction binding the contract method 0x1e8428b1.
+//
+// Solidity: function forkRepository(string name, string description, string url) returns(uint256)
+func (_Contract *ContractTransactorSession) ForkRepository(name string, description string, url string) (*types.Transaction, error) {
+	return _Contract.Contract.ForkRepository(&_Contract.TransactOpts, name, description, url)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -1731,15 +1754,16 @@ func (it *ContractRepositoryCreatedIterator) Close() error {
 
 // ContractRepositoryCreated represents a RepositoryCreated event raised by the Contract contract.
 type ContractRepositoryCreated struct {
-	RepId   *big.Int
-	RepName string
-	Owner   common.Address
-	Raw     types.Log // Blockchain specific contextual infos
+	RepId       *big.Int
+	RepName     string
+	Owner       common.Address
+	Description string
+	Raw         types.Log // Blockchain specific contextual infos
 }
 
-// FilterRepositoryCreated is a free log retrieval operation binding the contract event 0x5041508c74c5ad5ddc4c2c1f09ab873b5f067367dd2e8af9c7561d3556adb527.
+// FilterRepositoryCreated is a free log retrieval operation binding the contract event 0x5cf1e457076521acb7531066dee0401e9eb2b6fbf964617e4593c4a7c2f2e77e.
 //
-// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner)
+// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner, string description)
 func (_Contract *ContractFilterer) FilterRepositoryCreated(opts *bind.FilterOpts) (*ContractRepositoryCreatedIterator, error) {
 
 	logs, sub, err := _Contract.contract.FilterLogs(opts, "RepositoryCreated")
@@ -1749,9 +1773,9 @@ func (_Contract *ContractFilterer) FilterRepositoryCreated(opts *bind.FilterOpts
 	return &ContractRepositoryCreatedIterator{contract: _Contract.contract, event: "RepositoryCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchRepositoryCreated is a free log subscription operation binding the contract event 0x5041508c74c5ad5ddc4c2c1f09ab873b5f067367dd2e8af9c7561d3556adb527.
+// WatchRepositoryCreated is a free log subscription operation binding the contract event 0x5cf1e457076521acb7531066dee0401e9eb2b6fbf964617e4593c4a7c2f2e77e.
 //
-// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner)
+// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner, string description)
 func (_Contract *ContractFilterer) WatchRepositoryCreated(opts *bind.WatchOpts, sink chan<- *ContractRepositoryCreated) (event.Subscription, error) {
 
 	logs, sub, err := _Contract.contract.WatchLogs(opts, "RepositoryCreated")
@@ -1786,12 +1810,150 @@ func (_Contract *ContractFilterer) WatchRepositoryCreated(opts *bind.WatchOpts, 
 	}), nil
 }
 
-// ParseRepositoryCreated is a log parse operation binding the contract event 0x5041508c74c5ad5ddc4c2c1f09ab873b5f067367dd2e8af9c7561d3556adb527.
+// ParseRepositoryCreated is a log parse operation binding the contract event 0x5cf1e457076521acb7531066dee0401e9eb2b6fbf964617e4593c4a7c2f2e77e.
 //
-// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner)
+// Solidity: event RepositoryCreated(uint256 repId, string repName, address owner, string description)
 func (_Contract *ContractFilterer) ParseRepositoryCreated(log types.Log) (*ContractRepositoryCreated, error) {
 	event := new(ContractRepositoryCreated)
 	if err := _Contract.contract.UnpackLog(event, "RepositoryCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractRepositoryForkedIterator is returned from FilterRepositoryForked and is used to iterate over the raw logs and unpacked data for RepositoryForked events raised by the Contract contract.
+type ContractRepositoryForkedIterator struct {
+	Event *ContractRepositoryForked // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractRepositoryForkedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractRepositoryForked)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractRepositoryForked)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractRepositoryForkedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractRepositoryForkedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractRepositoryForked represents a RepositoryForked event raised by the Contract contract.
+type ContractRepositoryForked struct {
+	RepId       *big.Int
+	RepName     string
+	Owner       common.Address
+	Description string
+	Url         string
+	Raw         types.Log // Blockchain specific contextual infos
+}
+
+// FilterRepositoryForked is a free log retrieval operation binding the contract event 0x247460063d2be17b2ffed47f0cb18237cacc09ad163e5f2d1ff35e34d3d4d1ee.
+//
+// Solidity: event RepositoryForked(uint256 repId, string repName, address owner, string description, string url)
+func (_Contract *ContractFilterer) FilterRepositoryForked(opts *bind.FilterOpts) (*ContractRepositoryForkedIterator, error) {
+
+	logs, sub, err := _Contract.contract.FilterLogs(opts, "RepositoryForked")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractRepositoryForkedIterator{contract: _Contract.contract, event: "RepositoryForked", logs: logs, sub: sub}, nil
+}
+
+// WatchRepositoryForked is a free log subscription operation binding the contract event 0x247460063d2be17b2ffed47f0cb18237cacc09ad163e5f2d1ff35e34d3d4d1ee.
+//
+// Solidity: event RepositoryForked(uint256 repId, string repName, address owner, string description, string url)
+func (_Contract *ContractFilterer) WatchRepositoryForked(opts *bind.WatchOpts, sink chan<- *ContractRepositoryForked) (event.Subscription, error) {
+
+	logs, sub, err := _Contract.contract.WatchLogs(opts, "RepositoryForked")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractRepositoryForked)
+				if err := _Contract.contract.UnpackLog(event, "RepositoryForked", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRepositoryForked is a log parse operation binding the contract event 0x247460063d2be17b2ffed47f0cb18237cacc09ad163e5f2d1ff35e34d3d4d1ee.
+//
+// Solidity: event RepositoryForked(uint256 repId, string repName, address owner, string description, string url)
+func (_Contract *ContractFilterer) ParseRepositoryForked(log types.Log) (*ContractRepositoryForked, error) {
+	event := new(ContractRepositoryForked)
+	if err := _Contract.contract.UnpackLog(event, "RepositoryForked", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
