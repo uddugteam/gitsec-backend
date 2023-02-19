@@ -33,5 +33,8 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # Copy the built executable from the builder image
 COPY --from=builder /app/gitsec-backend /gitsec-backend
 
+# expose http port
+EXPOSE 8080
+
 # Set the entrypoint to the executable
 ENTRYPOINT ["/gitsec-backend", "serve"]
