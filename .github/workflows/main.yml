@@ -64,3 +64,14 @@ jobs:
           name: ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
           token: ${{ secrets.RELEASES_ACTION_GITHUB_TOKEN }}
+
+  deploy:
+    needs: build
+    name: Deploy App on digital ocean
+    runs-on: ubuntu-latest
+    steps:
+      - name: DigitalOcean App Platform deployment
+        uses: digitalocean/app_action@main
+        with:
+          app_name: andskur-gitsec-backend
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

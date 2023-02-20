@@ -35,6 +35,8 @@ type Repo struct {
 
 	Metadata string
 
+	ForkFrom string
+
 	// fileSystem is the filesystem where the repository is stored.
 	fileSystem billy.Filesystem
 	// server is the transport server used to handle git sessions.
@@ -46,13 +48,14 @@ type Repo struct {
 }
 
 // NewRepo creates a new Repo instance.
-func NewRepo(name, description, basePath string, id int, owner common.Address, fs billy.Filesystem) (*Repo, error) {
+func NewRepo(name, description, basePath, forkFrom string, id int, owner common.Address, fs billy.Filesystem) (*Repo, error) {
 	repo := &Repo{
 		Name:        name,
 		Description: description,
 		BasePath:    basePath,
 		ID:          id,
 		Owner:       owner,
+		ForkFrom:    forkFrom,
 	}
 
 	if err := repo.InitRepo(fs); err != nil {
@@ -92,12 +95,22 @@ func (r *Repo) InitRepo(fs billy.Filesystem) (err error) {
 // If the file system does not already exist, a new repository is created.
 func (r *Repo) initFileSystem() (err error) {
 	if !r.isRepoFSExists() {
-		r.Repocore, err = git.Init(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), nil)
-		if err != nil {
-			if errors.Is(err, git.ErrRepositoryAlreadyExists) {
-				return nil
+		if r.ForkFrom != "" {
+			r.Repocore, err = git.Clone(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), nil, &git.CloneOptions{
+				URL:               r.ForkFrom,
+				RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to clone Repocore on fs: %w", err)
 			}
-			return fmt.Errorf("failed to create new Repocore on fs: %w", err)
+		} else {
+			r.Repocore, err = git.Init(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), nil)
+			if err != nil {
+				if errors.Is(err, git.ErrRepositoryAlreadyExists) {
+					return nil
+				}
+				return fmt.Errorf("failed to create new Repocore on fs: %w", err)
+			}
 		}
 	} else {
 		r.Repocore, err = git.Open(filesystem.NewStorage(r.fileSystem, cache.NewObjectLRU(500)), nil)

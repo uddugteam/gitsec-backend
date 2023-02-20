@@ -125,9 +125,51 @@ func NewGitService(cfg *config.Scheme, blockchain *ethclient.Client) (*GitServic
 	}, nil
 }
 
+// TODO move events listeners to separate package
+
 func (g *GitService) StartListener() {
-	if err := g.ListenRepositoryCreation(); err != nil {
-		logger.Log().Error(err)
+	go func() {
+		if err := g.ListenRepositoryCreation(); err != nil {
+			logger.Log().Error(err)
+		}
+	}()
+
+	go func() {
+		if err := g.ListenRepositoryForks(); err != nil {
+			logger.Log().Error(err)
+		}
+	}()
+}
+
+func (g *GitService) ListenRepositoryForks() error {
+	repos := make(chan *contract.ContractRepositoryForked)
+	opts := &bind.WatchOpts{Context: context.Background()}
+
+Subscribe:
+	repositoryForksSubscriptions, err := g.contract.WatchRepositoryForked(opts, repos)
+	if err != nil {
+		return fmt.Errorf("failed subscribe to watch transfers event: %w", err)
+	}
+	defer repositoryForksSubscriptions.Unsubscribe()
+
+	logger.Log().Infof("listen contract repository fork events on %s", g.contractAddress.Hex())
+
+	for {
+		select {
+		case <-g.stop:
+			logger.Log().Warning("stop listen contract repository forks events")
+			close(repos)
+			return nil
+		case err := <-repositoryForksSubscriptions.Err():
+			logger.Log().Error(fmt.Errorf("repository forks subscription error: %w", err))
+			goto Subscribe
+		case r := <-repos:
+			logger.Log().Infof("catch repository forks event: repository %s with ID %d forked from %s created with owner %s", r.RepName, r.RepId, r.Url, r.Owner.Hex())
+
+			if err := g.CloneRepo(r.RepName, r.Description, r.Url, int(r.RepId.Int64()), r.Owner); err != nil {
+				logger.Log().Error(fmt.Errorf("error to fork repository: %w", err))
+			}
+		}
 	}
 }
 
@@ -147,7 +189,7 @@ Subscribe:
 	for {
 		select {
 		case <-g.stop:
-			logger.Log().Warning("stop listen contract transfers events")
+			logger.Log().Warning("stop listen contract repository creation events")
 			close(repos)
 			return nil
 		case err := <-repositoryCreationSubscriptions.Err():
@@ -163,12 +205,37 @@ Subscribe:
 	}
 }
 
-func (g *GitService) CreateRepo(name, description string, id int, owner common.Address) error {
-	repo, err := models.NewRepo(name, description, g.baseGitPath, id, owner, g.fs)
+func (g *GitService) CloneRepo(name, description, forkFrom string, id int, owner common.Address) error {
+	repo, err := models.NewRepo(name, description, g.baseGitPath, forkFrom, id, owner, g.fs)
 	if err != nil {
 		return fmt.Errorf("failed to create new repo: %w", err)
 	}
 
+	if err := g.processNewRepo(repo); err != nil {
+		return fmt.Errorf("process new repo: %w", err)
+	}
+
+	if err := g.updateRepositoryMeta(repo); err != nil {
+		return fmt.Errorf("failed to update repository meta: %w", err)
+	}
+
+	return nil
+}
+
+func (g *GitService) CreateRepo(name, description string, id int, owner common.Address) error {
+	repo, err := models.NewRepo(name, description, g.baseGitPath, "", id, owner, g.fs)
+	if err != nil {
+		return fmt.Errorf("failed to create new repo: %w", err)
+	}
+
+	if err := g.processNewRepo(repo); err != nil {
+		return fmt.Errorf("process new repo: %w", err)
+	}
+
+	return nil
+}
+
+func (g *GitService) processNewRepo(repo *models.Repo) error {
 	meta, err := repo.GenMeta()
 	if err != nil {
 		return fmt.Errorf("failed to generate repository meta: %w", err)
@@ -179,12 +246,12 @@ func (g *GitService) CreateRepo(name, description string, id int, owner common.A
 		return fmt.Errorf("marshal repository metadata: %w", err)
 	}
 
-	hash, err := g.pinner.Pin(name+"-meta.json", bytes.NewReader(metaJson))
+	hash, err := g.pinner.Pin(repo.Name+"-meta.json", bytes.NewReader(metaJson))
 	if err != nil {
 		return fmt.Errorf("pin repository metadata to ipfs: %w", err)
 	}
 
-	logger.Log().Infof("repository %s metadata %s pinned to IPFS", name, hash)
+	logger.Log().Infof("repository %s metadata %s pinned to IPFS", repo.Name, hash)
 
 	repo.Metadata = hash
 
@@ -204,13 +271,7 @@ func (g *GitService) CreateRepo(name, description string, id int, owner common.A
 		return fmt.Errorf("failed to send transaction: %w", err)
 	}
 
-	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), name, repo.ID, hash)
-
-	rewrewr := &models.Repo{Name: name}
-
-	if err := g.repository.GetRepo(rewrewr); err != nil {
-		return err
-	}
+	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), repo.Name, repo.ID, hash)
 
 	return nil
 }
@@ -291,60 +352,68 @@ func (g *GitService) ReceivePack(ctx context.Context, req io.Reader, repositoryN
 
 	logger.Log().Infof("recieve pack handled in %s", time.Since(start))
 
+	if err := g.updateRepositoryMeta(repo); err != nil {
+		return nil, fmt.Errorf("failed to update repository meta: %w", err)
+	}
+
+	return res, nil
+}
+
+func (g *GitService) updateRepositoryMeta(repo *models.Repo) error {
 	head, err := repo.Head()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get repo head: %w", err)
+		return fmt.Errorf("failed to get repo head: %w", err)
 	}
 
 	tree, err := repo.Tree(head.Hash())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get repo tree: %w", err)
+		return fmt.Errorf("failed to get repo tree: %w", err)
 	}
 
 	meta, err := repo.GenMeta()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate repository meta: %w", err)
+		return fmt.Errorf("failed to generate repository meta: %w", err)
 	}
 
 	if err := meta.FillContent(tree); err != nil {
-		return nil, fmt.Errorf("failed to fill metadata content: %w", err)
+		return fmt.Errorf("failed to fill metadata content: %w", err)
 	}
 
 	if err := meta.FillCommit(repo); err != nil {
-		return nil, fmt.Errorf("failed to fill metadata tree commits: %w", err)
+		return fmt.Errorf("failed to fill metadata tree commits: %w", err)
 	}
 
 	if err := g.StoreMetaTree(meta, repo); err != nil {
-		return nil, fmt.Errorf("failed to store metadata content: %w", err)
+		return fmt.Errorf("failed to store metadata content: %w", err)
 	}
 
 	metaBytes, err := json.Marshal(meta)
 	if err != nil {
-		return nil, fmt.Errorf("marshal repository metadata: %w", err)
+		return fmt.Errorf("marshal repository metadata: %w", err)
 	}
 
-	hash, err := g.pinner.Pin(fmt.Sprintf("%s-%d-meta.json", repositoryName, time.Now().Unix()), bytes.NewReader(metaBytes))
+	hash, err := g.pinner.Pin(fmt.Sprintf("%s-%d-meta.json", repo.Name, time.Now().Unix()), bytes.NewReader(metaBytes))
 	if err != nil {
-		return nil, fmt.Errorf("pin repository metadata to ipfs: %w", err)
+		return fmt.Errorf("pin repository metadata to ipfs: %w", err)
 	}
 
-	logger.Log().Infof("repository %s metadata %s pinned to IPFS", repositoryName, hash)
+	logger.Log().Infof("repository %s metadata %s pinned to IPFS", repo.Name, hash)
 
 	repo.Metadata = hash
 
 	sign, err := g.signer.Sign(g.chainId)
 	if err != nil {
-		return nil, fmt.Errorf("prepare tx signing: %w", err)
+		return fmt.Errorf("prepare tx signing: %w", err)
 	}
 
 	tx, err := g.contract.UpdateIPFS(sign, big.NewInt(int64(repo.ID)), hash)
 	if err != nil {
-		return nil, fmt.Errorf("failed to send transaction: %w", err)
+		return fmt.Errorf("failed to send transaction: %w", err)
 	}
 
-	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), repositoryName, repo.ID, hash)
+	logger.Log().Infof("transaction %s to update repository %s ID %d metadata %s send to blockchan", tx.Hash().Hex(), repo.Name, repo.ID, hash)
 
-	return res, nil
+	return nil
 }
 
 func (g *GitService) StoreMetaTree(meta *models.RepoMetadata, repo *models.Repo) error {
